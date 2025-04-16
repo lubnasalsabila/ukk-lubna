@@ -5,41 +5,39 @@
 <div class="container-fluid px-4">
     <h1 class="mt-4">Tambah Produk</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="home">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="produk">Produk</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('product.index') }}">Produk</a></li>
         <li class="breadcrumb-item active">Tambah Produk</li>
     </ol>
-    <form action="" method="post" enctype="multipart/form-data">
+    <form action="{{ route('product.update', $product['id']) }}" method="post" enctype="multipart/form-data">
+        @csrf
+        @method('PATCH')
 
         <div class="card">
             <div class="card-body row">
                 <div class="ms-1 col">
                     <div class="mb-3">
-                        <label for="name" class="form-label">Nama Produk</label>
-                        <input type="text" class="form-control" id="name" name="name" value="name">
+                        <label for="name_product" class="form-label">Nama Produk</label>
+                        <input type="text" class="form-control" id="name_product" name="name_product" value="{{ $product['name_product'] }}">
                     </div>
                     <div class="mb-3">
-                        <label for="stok" class="form-label">Stok Produk</label>
-                        <input type="number" class="form-control" id="stok" name="stok" value="stok"  disabled>
+                        <label for="stock" class="form-label">Stok Produk</label>
+                        <input type="number" class="form-control" id="stock" name="stock" value="{{ $product['stock'] }}"  disabled>
                     </div>
                 </div>
                 <div class="me-1 col">
                     <div class="mb-3">
-                        <label for="harga" class="form-label">Harga Produk</label>
-                        <input type="text" class="form-control" id="harga" name="harga" oninput="formatRupiah(this)" value="harga">
-                        <!-- Input tersembunyi untuk menyimpan nilai angka bersih -->
-                        <input type="hidden" id="hargaValue" name="hargaValue" value="harga">
+                        <label for="price" class="form-label">Harga Produk</label>
+                        <input type="text" class="form-control" id="price" name="price" oninput="formatRupiah(this)" value="Rp {{ number_format($product['price'], 0, ',', '.') }}">
+                        <input type="hidden" id="hargaValue" name="hargaValue" value="{{ $product['harga'] }}">
                     </div>
                     <div class="mb-3">
-                        <label for="gambar" class="form-label">Gambar Produk</label>
-                        <input type="file" class="form-control" id="gambar" name="gambar" value="gambar">
+                        <label for="image" class="form-label">Gambar Produk</label>
+                        <input type="file" class="form-control" id="image" name="image" value="{{ $product['image'] }}">
                     </div>    
                 </div>
             </div>
             <div class="me-4 mb-4 d-flex ms-auto">
-                <a type="button" class="btn btn-secondary me-1" href="">
-                    Reset
-                </a>
                 <button type="submit" class="btn btn-primary ms-1" href="">
                     <i class="fa-solid fa-paper-plane"></i>
                     Kirim Produk

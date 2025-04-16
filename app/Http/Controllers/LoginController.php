@@ -29,27 +29,35 @@ class LoginController extends Controller
      */
     public function store(Request $request)
     {
+        // dd('halo');
         //
         $request->validate([
-            'email'=> 'alpha_dash',
-            'password' => 'alpha_dash',
+            'email' => 'required|email',
+            'password' => 'required|alpha_dash',
         ], [
-            'email.required' => 'Email harus valid',
-            'email.email' => 'Email harus valid',
-            'password.required' => 'Password harus valid',
-            'password.alpha_dash' => 'Password harus berisikan huruf dan simbol tanpa spasi',
+            'email.required' => 'email harus diisi',
+            'email.email' => 'email harus valid',
+            'password.required' => 'Password harus diisi',
+            'password.alpha_dash' => 'Password harus berisi huruf dan karakter tanpa spasi'
         ]);
 
-        if(Auth::attempt()) {
+        $validate = [
+            'email' => $request -> email,
+            'password' => $request -> password
+        ];
+
+        if (Auth::attempt($validate)) {
             return redirect()->route('home')->with('success', 'Anda berhasil login');
+        } else {
+            return redirect()->route('login')->with('failed', 'email/password anda salah');
         }
     }
 
-    public function logout() {
-
+    public function logout()
+    {
         Auth::logout();
-
-        return redirect()->route('login')->with('success', 'Anda berhasil logout');
+        
+        return redirect()->route('login')->with('success', 'Anda telah logout');
     }
 
     /**

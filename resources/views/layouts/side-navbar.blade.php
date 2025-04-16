@@ -30,7 +30,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="">Logout</a></li>
+                        <li><a class="dropdown-item" href="{{route('logout')}}">Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -41,23 +41,25 @@
                     <div class="sb-sidenav-menu">
                         <div class="nav">
                             <div class="sb-sidenav-menu-heading">Core</div>
-                            <a class="nav-link" href="">
+                            <a class="nav-link" href="{{route('home')}}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 Dashboard
                             </a>
                             <div class="sb-sidenav-menu-heading">Interface</div>
-                            <a class="nav-link" href="">
+                            <a class="nav-link" href="{{route('product.index')}}">
                                 <div class="sb-nav-link-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-                                Produk
+                                Product
                             </a>
-                            <a class="nav-link" href="">
+                            <a class="nav-link" href="{{route('sale.index')}}">
                                 <div class="sb-nav-link-icon"><i class="fa-solid fa-cart-shopping"></i></div>
-                                Penjualan
+                                Sale
                             </a>
-                            <a class="nav-link" href="">
-                                <div class="sb-nav-link-icon"><i class="fa-solid fa-users"></i></div>
-                                Users
-                            </a>
+                            @if(Auth::user()->role == 'admin')
+                                <a class="nav-link" href="{{route('user.index')}}">
+                                    <div class="sb-nav-link-icon"><i class="fa-solid fa-users"></i></div>
+                                    Users
+                                </a>
+                            @endif
                             
                         </div>
                     </div>

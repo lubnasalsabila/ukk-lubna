@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Models\Product;
+use App\Http\Models\Detail_sale;
 
 class DetailSaleController extends Controller
 {
@@ -12,6 +14,8 @@ class DetailSaleController extends Controller
     public function index()
     {
         //
+        $product = Product::all();
+        return view('component.penjualan.index', compact('products'));
     }
 
     /**
@@ -20,6 +24,9 @@ class DetailSaleController extends Controller
     public function create()
     {
         //
+        $detail_sales = Detail_sale::with('product')->get();
+        // dd($penjualans);
+        return view('component.penjualan.index', compact("detail_sales"));
     }
 
     /**

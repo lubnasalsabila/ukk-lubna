@@ -1,33 +1,33 @@
 <?php
-
 namespace App\Http\Controllers;
-
+use App\Models\Sale;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+      * Display a listing of the resource.
      */
     public function index()
     {
         //
-        $users = User::All();
+        $users = User::all();
         return view('component.user.index', compact('users'));
     }
-
     /**
-     * Show the form for creating a new resource.
+      * Show the form for creating a new resource.
      */
     public function create()
     {
         //
         return view('component.user.create');
     }
-
     /**
-     * Store a newly created resource in storage.
+      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
@@ -36,68 +36,95 @@ class UserController extends Controller
             'username' => 'required',
             'email' => 'required',
             'role' => 'required',
+            'password' => 'required',
         ]);
-
-        $validateData = [
+        User::create([
             'username' => $request->username,
             'email' => $request->email,
             'role' => $request->role,
-        ];
-
-        if($request->password('IsValid')){
-            $validateData = Hash::make($request->password);
-        }
-
-        User::create($validateData);
-
-        return redirect()->route('user.index')->with('success', 'berhasil menambahkan data user');
+            'password' => Hash::make($request->password),
+        ]);
+        // dd($request->all());
+        return redirect()->route('user.index')->with('success', 'Berhasil menambahkan data user!');
     }
-
     /**
-     * Display the specified resource.
+      * Display the specified resource.
      */
-    public function show(string $id)
+    // public function show(string $id)
+    // {
+    //     //
+    // }
+    // controller data buat chart
+    public function adminPage()
     {
-        //
-    }
 
+        $salesCountToday = Sale::whereDate('created_at', Carbon::today())->count();
+
+        $latestSale = Sale::latest()->first();
+        $sales = Sale::selectRaw("DATE(CONVERT_TZ(created_at, '+00:00', '+07:00')) as date, COUNT(*) as total_sales")
+        ->groupBy('date')
+        ->orderBy('date', 'ASC')
+        ->get();
+    //   bar
+        $dates = $sales->pluck('date')->map(fn($date) => Carbon::parse($date)->format('d F Y'))->toArray();
+        $salesCountChart = $sales->pluck('total_sales')->toArray();
+//   pie
+        $productSales = DB::table('Sales')
+            ->join('penjualans', 'Sales.id', '=', 'penjualans.Sale_id')
+            ->join('produks', 'penjualans.produk_id', '=', 'produks.id')
+            ->selectRaw('produks.name as product_name, SUM(penjualans.jumlahDibeli) as total_sold')
+            ->groupBy('product_name')
+            ->get();
+        // Format data Pie Chart
+        $productNames = $productSales->pluck('product_name')->toArray();
+        $productTotals = $productSales->pluck('total_sold')->toArray();
+        return view('home', compact(
+            'salesCountToday',     // buat kasir
+            'latestSale',     // buat kasir
+            'dates',
+            'salesCountChart',     // buat chart bar admin
+            'productNames',
+            'productTotals'
+        ));
+    }
     /**
-     * Show the form for editing the specified resource.
+      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
         //
-        $user = User::find($id);
-        return view('component.user.edit', compact('user'));
+        $users = User::find($id);
+        return view('component.user.edit', compact('users'));
     }
-
     /**
-     * Update the specified resource in storage.
+      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
-        $request->validate([
+        $validatedData = $request->validate([
             'username' => 'required',
             'email' => 'required',
             'role' => 'required',
         ]);
-
-        $validateData = [
-            'username' => $request->username,
-            'email' => $request->email,
-            'role' => $request->role,
+        $updateData = [
+            'username' => $validatedData['username'],
+            'email' => $validatedData['email'],
+            'role' => $validatedData['role'],
         ];
 
-        if($request->password('isValid'));
-
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+        User::where('id', $id)->update($updateData);
+        return redirect()->route('user.index')->with('success', 'Data User berhasil diperbarui!');
     }
-
     /**
-     * Remove the specified resource from storage.
+      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         //
+        User::where('id', $id)->delete();
+        return redirect()->back()->with('success', 'Berhasil menghapus data!');
     }
 }

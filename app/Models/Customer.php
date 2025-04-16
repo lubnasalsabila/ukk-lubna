@@ -15,8 +15,8 @@ class Customer extends Model
         'poin',
     ];
 
-    public function detail_sales() {
-        return $this->hasMany(DetailSaleController::class);
+    public function sales() {
+        return $this->hasMany(Sale::class);
     }
 
 }

@@ -116,22 +116,22 @@ button{
 </head>
 <body>
 
-@if(Session::get('failed'))
+@if($message = Session::get('failed'))
     <script>
         Swal.fire({
             icon: "error",
             title: "Oops...",
-            text:"{{Session::get('failed')}}"
+            text:"{{$message}}"
             });
     </script>
 @endif
 
-@if(Session::get('success'))
+@if($message = Session::get('success'))
     <script>
         Swal.fire({
             title: "Success !",
             icon: "success",
-            text:"{{Session::get('success')}}",
+            text:"{{$message}}",
             draggable: true
         });
     </script>
@@ -146,7 +146,7 @@ button{
         <h3>Login </h3>
 
         <label for="email">Email</label>
-        <input type="text" placeholder="Email or Phone" id="email" name="email">
+        <input type="text" placeholder="Email" id="email" name="email">
 
         <label for="password">Password</label>
         <input type="password" placeholder="Password" id="password" name="password">

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Detail_sale extends Model
 {
     use HasFactory;
@@ -17,10 +18,10 @@ class Detail_sale extends Model
     ];
 
     public function products(){
-        return $this->belongsTo(ProductController::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function sales(){
-        return $this->belongsTo(SaleController::class, 'sale_id');
+        return $this->belongsTo(Sale::class, 'sale_id');
     }
 }

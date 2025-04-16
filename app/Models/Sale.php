@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Sale extends Model
 {
     use HasFactory;
@@ -20,7 +21,7 @@ class Sale extends Model
     ];
 
     public function detail_sales(){
-        return $this->hasMany(DetailSale::class, 'sale_id');
+        return $this->hasMany(Detail_sale::class, 'sale_id');
     }
 
     public function customers() {

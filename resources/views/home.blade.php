@@ -4,12 +4,34 @@
 
 <div class="container-fluid px-4">
 
-    <h1 class="mt-4">Welcome, Good Morning</h1>
+@if($message = Session::get('failed'))
+    <script>
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text:"{{$message}}"
+            });
+    </script>
+@endif
+
+@if($message = Session::get('success'))
+    <script>
+        Swal.fire({
+            title: "Success !",
+            icon: "success",
+            text:"{{$message}}",
+            draggable: true
+        });
+    </script>
+@endif
+
+    <h1 class="mt-4">Welcome, Good Morning {{Auth::user()->username}}</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item active">Dashboard</li>
     </ol>
     <div class="card">
         <div class="card-body">
+            @if (Auth::user()->role == 'staff') 
                 <div class="card">
                     <div class="card-body">
                         <h3>Selamat Datang Petugas</h3>
@@ -29,6 +51,7 @@
                         </div>
                     </div>
                 </div>
+            @elseif(Auth::user()->role == 'admin')
                 <div class="row">
                     <div class="col-md-8">
                         <canvas id="salesChart"></canvas>
@@ -38,6 +61,7 @@
                         <canvas id="productChart" style="height: 300px; width: 100%;"></canvas>
                     </div>
                 </div>
+            @endif
         </div>
     </div>
     
