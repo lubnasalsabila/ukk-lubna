@@ -40,18 +40,18 @@ Route::middleware('IsGuest')->group(function () {
     Route::get('/login', function () {
         return view('login');
     })->name('login');
-    
+
     Route::post('/login-auth', [LoginController::class, 'store'])->name('login-auth');
 });
 
 // route yang bisa diakses dua role ( admin, kasir ) setelah login
 Route::middleware('IsLogin')->group(function() {
     Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
-    
-    // Route::get('/home', [UserController::class, 'adminPage'])->name('home');
-    Route::get('/home',function() {
-        return view('home');
-    })->name('home');
+
+    Route::get('/home', [UserController::class, 'adminPage'])->name('home');
+    // Route::get('/home',function() {
+    //     return view('home');
+    // })->name('home');
 
     Route::prefix('/product')->name('product.')->group(function(){
         Route::get('/', [ProductController::class, 'index'])->name('index');
@@ -67,8 +67,8 @@ Route::middleware('IsLogin')->group(function() {
 // route yang bisa diakses role admin saja
 Route::middleware(['IsLogin', 'IsAdmin'])->group(function(){
     Route::prefix('/product')->name('product.')->group(function(){
-        Route::get('/create', [ProductController::class, 'create'])->name('create');  
-        Route::post('/store', [ProductController::class, 'store'])->name('store');  
+        Route::get('/create', [ProductController::class, 'create'])->name('create');
+        Route::post('/store', [ProductController::class, 'store'])->name('store');
         Route::delete('/{id}', [ProductController::class, 'destroy'])->name('delete');
         Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
         Route::patch('/{id}', [ProductController::class, 'update'])->name('update');
@@ -82,10 +82,10 @@ Route::middleware(['IsLogin', 'IsAdmin'])->group(function(){
         Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
         Route::patch('/{id}', [UserController::class, 'update'])->name('update');
     });
-}); 
+});
 
 // route yang bisa diakses role kasir saja
-Route::middleware(['IsLogin','IsStaff'])->group(function(){   
+Route::middleware(['IsLogin','IsStaff'])->group(function(){
     Route::prefix('/DetailSale')->name('DetailSale.')->group(function(){
         Route::get('/', [DetailSaleController::class, 'index'])->name('index');
     });

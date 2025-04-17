@@ -20,6 +20,6 @@ class IsStaff
         if(Auth::user()->role == 'staff'){
             return $next($request);
         }
-        return redirect()->route('error.permission');
+        return redirect()->route('error-permission');
     }
 }

@@ -7,7 +7,7 @@
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="{{ route('sale.index') }}">Riwayat Transaksi</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('Detail_sale.index') }}">Penjualan</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('DetailSale.index') }}">Penjualan</a></li>
         <li class="breadcrumb-item active">Transaksi</li>
     </ol>
     <form action="{{ route('sale.store') }}" method="post">
@@ -23,9 +23,9 @@
                         @endphp
                         @foreach ($cart as $item)
                             @php
-                                $subtotal = $item['price'] * $item['jumlah'];
+                                $subtotal = $item['harga'] * $item['jumlah'];
                                 $grandTotal += $subtotal;
-                            @endphp 
+                            @endphp
                             <div class="row align-items-center my-2">
                                 <div class="col-8">
                                     <span class="text-secondary">{{ $item['nama'] }}</span><br>
@@ -46,22 +46,22 @@
                 </div>
                 <div class="ms-1 col">
                     <div class="mb-3">
-                        <label for="member" class="form-label">
-                            Member Status 
+                        <label for="customer" class="form-label">
+                            Member Status
                             <small><span class="text-danger">Dapat juga membuat member</span></small>
                         </label>
-                        <select id="member" name="member" class="form-select" onchange="toggleNoTelp()">
-                            <option value="bukan member">Bukan Member</option>
-                            <option value="member">Member</option>
+                        <select id="customer" name="customer" class="form-select" onchange="toggleNoTelp()">
+                            <option value="bukan customer">Bukan Member</option>
+                            <option value="customer">Member</option>
                         </select>
                     </div>
-                    
-                    <div class="mb-3" id="noTelpContainer" style="display: none;">
-                        <label for="noTelp" class="form-label">
-                            No Telepon 
+
+                    <div class="mb-3" id="no_telpContainer" style="display: none;">
+                        <label for="no_telp" class="form-label">
+                            No Telepon
                             <small><span class="text-danger">(daftar/gunakan member)</span></small>
                         </label>
-                        <input type="number" class="form-control" id="noTelp" name="noTelp">
+                        <input type="text" class="form-control" id="no_telp" name="no_telp">
                     </div>
 
                     <div class="mb-3">
@@ -76,7 +76,7 @@
             <div class="me-4 mb-4 d-flex ms-auto">
                 <button type="submit" class="btn btn-primary ms-1" href="" id="submitButton">
                     <i class="fa-solid fa-paper-plane"></i>
-                    Kirim 
+                    Kirim
                 </button>
             </div>
         </div>
@@ -87,44 +87,40 @@
 
     // buat munculin inputan no telp kalau user milih member
     function toggleNoTelp() {
-        document.getElementById("noTelpContainer").style.display =
-            document.getElementById("member").value === "member" ? "block" : "none";
+        document.getElementById("no_telpContainer").style.display =
+            document.getElementById("customer").value === "customer" ? "block" : "none";
     }
 
     // format rupiah buat di inputan harga
     function formatRupiah(input) {
-        // Ambil nilai input dan hapus semua karakter selain angka
         let angka = input.value.replace(/\D/g, "");
 
-        // Format angka ke Rupiah untuk tampilan (termasuk "Rp")
         let formatted = new Intl.NumberFormat("id-ID", {
             style: "currency",
             currency: "IDR",
             minimumFractionDigits: 0
         }).format(angka);
 
-        // Tampilkan kembali di input dengan "Rp"
         input.value = formatted;
 
-        // Simpan nilai angka bersih dalam input tersembunyi sebelum form dikirim
-        document.getElementById("totalBayarValue").value = angka;  // Menyimpan nilai angka bersih
+        document.getElementById("totalBayarValue").value = angka;
         console.log(document.getElementById('totalBayarValue').value);
     }
 
-    // javascript kalau bayar nya kurang
+    // buat warning message
     document.getElementById("totalBayar").addEventListener("input", function() {
         let totalBayar = parseInt(document.getElementById("totalBayarValue").value) || 0;
-        let grandTotal = {{ $grandTotal }}; // Ambil nilai dari PHP
+        let grandTotal = {{ $grandTotal }};
         let warningMessage = document.getElementById("warningMessage");
         let submitButton = document.getElementById("submitButton");
 
         if (totalBayar < grandTotal) {
-            warningMessage.style.display = "block"; // Tampilkan pesan
-            submitButton.disabled = true; // Nonaktifkan tombol
+            warningMessage.style.display = "block";
+            submitButton.disabled = true;
             submitButton.classList.add("bg-opacity-50");
         } else {
-            warningMessage.style.display = "none"; // Tampilkan pesan
-            submitButton.disabled = false; // Nonaktifkan tombol
+            warningMessage.style.display = "none";
+            submitButton.disabled = false;
         }
     });
 

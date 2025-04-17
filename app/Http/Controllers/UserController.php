@@ -65,14 +65,14 @@ class UserController extends Controller
         ->groupBy('date')
         ->orderBy('date', 'ASC')
         ->get();
-    //   bar
+        //   bar
         $dates = $sales->pluck('date')->map(fn($date) => Carbon::parse($date)->format('d F Y'))->toArray();
         $salesCountChart = $sales->pluck('total_sales')->toArray();
-//   pie
-        $productSales = DB::table('Sales')
-            ->join('penjualans', 'Sales.id', '=', 'penjualans.Sale_id')
-            ->join('produks', 'penjualans.produk_id', '=', 'produks.id')
-            ->selectRaw('produks.name as product_name, SUM(penjualans.jumlahDibeli) as total_sold')
+        //   pie
+        $productSales = DB::table('sales')
+            ->join('detail_sales', 'sales.id', '=', 'detail_sales.sale_id')
+            ->join('products', 'detail_sales.product_id', '=', 'products.id')
+            ->selectRaw('products.name_product as product_name, SUM(detail_sales.quantity) as total_sold')
             ->groupBy('product_name')
             ->get();
         // Format data Pie Chart

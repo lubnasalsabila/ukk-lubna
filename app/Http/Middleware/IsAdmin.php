@@ -20,6 +20,6 @@ class IsAdmin
         if(Auth::user()->role == 'admin'){
             return $next($request);
         }
-        return redirect()->route('error.permission');
+        return redirect()->route('error-permission');
     }
 }

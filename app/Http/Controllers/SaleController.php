@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-
-use App\Models\Costumer;
+use App\Exports\SalesExport;
+use App\Models\Customer;
 use App\Models\Detail_sale;
 use App\Models\Product;
 use App\Models\Sale;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SaleController extends Controller
 {
@@ -50,10 +52,13 @@ class SaleController extends Controller
         $products = $request->shop;
         $total_pay = (int)str_replace(['Rp. ', '.'], '', $request->totalBayarValue);
         $grandTotal = (int)$request->grandTotal;
+        $earn_poin = 0;
         $customer_id = null;
 
-        if ($request->customer == 'member') {
-            $no_telp = $request->no_telp;
+        // dd($request);
+        if ($request->customer == 'customer') {
+            $earn_poin = $grandTotal / 100 ;
+            $no_telp = $request->input('no_telp');
             $existCustomer = Customer::where('no_telp', $no_telp)->first();
 
             $isFirstPurchase = false;
@@ -64,13 +69,13 @@ class SaleController extends Controller
                 $isFirstPurchase = $jumlahTransaksi == 0;
 
                 $existCustomer->update([
-                    'poin' => $existCustomer->poin + ($grandTotal / 100),
+                    'poin' => $existCustomer->poin + $earn_poin,
                 ]);
                 $customer_id = $existCustomer->id;
             } else {
                 $newCustomer = Customer::create([
                     'no_telp' => $no_telp,
-                    'poin' => $grandTotal / 100,
+                    'poin' => $earn_poin,
                 ]);
                 $customer_id = $newCustomer->id;
                 $isFirstPurchase = true;
@@ -80,13 +85,13 @@ class SaleController extends Controller
         // Buat transaksi baru
         $sale = Sale::create([
             'sale_date' => now(),
-            'customer_id' => $customer_id, 
+            'customer_id' => $customer_id,
             'total_price' => $grandTotal,
             'total_pay' => $total_pay,
             'cashback' => $total_pay - $grandTotal,
-            'earned_poin' => 0,
+            'earn_poin' => $earn_poin,
             'used_poin' => 0,
-            'user_id' => Auth::user()->id,
+            'staff_id' => Auth::user()->id,
         ]);
 
         // Simpan detail produk yang dibeli
@@ -100,40 +105,34 @@ class SaleController extends Controller
 
             $sales_products[] = "{$name} ( {$quantity} : Rp. {$price} )";
 
-            // Update stok produk
             $productModel = Product::find($id);
-            // dd($id, $jumlahDibeli, $productModel->stok);
             if ($productModel) {
                 $productModel->update(['stock' => $productModel->stock - $quantity]);
             }
 
-            // Simpan detail penjualan
             Detail_sale::create([
                 'sale_id' => $sale->id,
-                'produk_id' => $id,
+                'product_id' => $id,
                 'quantity' => $quantity,
                 'sub_total' => $sub_total,
             ]);
         }
 
-        // Update sales_products di Sale setelah data dikumpulkan
-        // $transaksi->update(['sales_products' => implode(' , ', $sales_products)]);
-
-        // Redirect sesuai kondisi
-        if ($request->customer == 'member') {
-            return redirect()->route('transaksi.next-create', $sale->id)->with('isFirstPurchase', $isFirstPurchase);
+        if ($request->customer == 'customer') {
+            return redirect()->route('sale.next-create', $sale->id)->with('isFirstPurchase', $isFirstPurchase);
         }
 
-        return redirect()->route('transaksi.print', $sale->id);
-    }  
+        return redirect()->route('sale.print', $sale->id);
+    }
 
     /**
      * Display the specified resource.
      */
     public function nextCreate($id)
     {
-        $sale = Sale::with(['detail_sales', 'customer'])->findOrFail($id);
-        $isFirstPurchase = session('isFirstPurchase', false); // default false kalau tidak ada session
+        $sale = Sale::with(['detail_sales', 'customers'])->findOrFail($id);
+        $isFirstPurchase = session('isFirstPurchase', true);
+        // $isFirstPurchase = session()->get('isFirstPurchase', false);
 
         return view('component.transaksi.nextCreate', compact('sale', 'isFirstPurchase'));
     }
@@ -144,19 +143,18 @@ class SaleController extends Controller
         $sale = Sale::findOrFail($id);
 
         $customer_name = $request->input('customer_name');
-        $gunakanPoin = $request->has('gunakan_poin'); 
+        $gunakanPoin = $request->has('gunakan_poin');
 
-        if ($customer_name && $transaksi->customer) {
-            if ($transaksi->customer->customer_name !== $customer_name) {
-                $transaksi->customer->update([
+        if ($customer_name && $sale->customers) {
+            if ($sale->customers->customer_name !== $customer_name) {
+                $sale->customers->update([
                     'customer_name' => $customer_name,
                 ]);
             }
         }
 
-        // Kalau checkbox "gunakan poin" dipilih
-        if ($gunakanPoin && $sale->customer) {
-            $poin = $sale->customer->poin;
+        if ($gunakanPoin && $sale->customers) {
+            $poin = $sale->customers->poin;
 
             // Update total bayar dan poin
             $sale->update([
@@ -165,30 +163,30 @@ class SaleController extends Controller
                 'used_poin' => $poin,
             ]);
 
-            $sale->customer->update([
-                'poin' => $sale->customer->poin - $poin,
+            $sale->customers->update([
+                'poin' => $sale->customers->poin - $poin,
             ]);
         }
 
-        return redirect()->route('transaksi.print', $sale->id);
+        return redirect()->route('sale.print', $sale->id);
     }
 
     public function print($id)
     {
         //
-        $transaksi = Transaksi::with(['penjualans', 'user', 'member'])->findOrFail($id);
-        return view('component.transaksi.print', compact('transaksi'));
+        $sale = Sale::with(['detail_sales', 'users', 'customers'])->findOrFail($id);
+        return view('component.transaksi.print', compact('sale'));
     }
 
     public function exportPDF($id)
     {
-        $transaksi = Transaksi::with('member', 'user')->findOrFail($id);
-        $penjualan = Penjualan::where('transaksi_id', $transaksi->id)->with('produk')->get();
+        $sale = Sale::with('customers', 'users')->findOrFail($id);
+        $detail_sale = Detail_sale::where('sale_id', $sale->id)->with('products')->get();
 
         $data = [
-            'transaksi' => $transaksi,
-            'penjualan' => $penjualan,
-            'isMember' => $transaksi->member != null,
+            'sale' => $sale,
+            'detail_sale' => $detail_sale,
+            'isMember' => $sale->customer != null,
         ];
         // return view('views.pdf.invoice', $data);
         $pdf = Pdf::loadView('component.transaksi.pdf', $data);
@@ -198,24 +196,24 @@ class SaleController extends Controller
 
     public function exportExcel()
     {
-        return Excel::download(new TransaksiExport, 'laporan-pembelian.xlsx');
+        return Excel::download(new SalesExport, 'laporan-pembelian.xlsx');
     }
 
     public function lihat($id)
     {
-        $transaksi = Transaksi::with(['penjualans.produk', 'member', 'user'])->find($id);
+        $sale = Sale::with(['detail_sales.product', 'customers', 'users'])->find($id);
         // dd($transaksi);
-        if (!$transaksi) {
+        if (!$sale) {
             return response()->json(['error' => 'Data tidak ditemukan'], 404);
         }
 
-        return response()->json($transaksi->toArray());
+        return response()->json($sale->toArray());
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Transaksi $transaksi)
+    public function edit(Sale $sale)
     {
         //
     }
@@ -223,7 +221,7 @@ class SaleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Transaksi $transaksi)
+    public function update(Request $request, Sale $sale)
     {
         //
     }
@@ -231,7 +229,7 @@ class SaleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Transaksi $transaksi)
+    public function destroy(Sale $sale)
     {
         //
     }

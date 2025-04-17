@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers_', function (Blueprint $table) {
+        Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_name');
+            $table->string('customer_name')->nullable();
             $table->string('no_telp');
             $table->integer('poin');
             $table->timestamps();

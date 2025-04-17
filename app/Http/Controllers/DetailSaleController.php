@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Models\Product;
-use App\Http\Models\Detail_sale;
+use App\Models\Product;
+use App\Models\Detail_sale;
 
 class DetailSaleController extends Controller
 {
@@ -14,7 +14,7 @@ class DetailSaleController extends Controller
     public function index()
     {
         //
-        $product = Product::all();
+        $products = Product::all();
         return view('component.penjualan.index', compact('products'));
     }
 

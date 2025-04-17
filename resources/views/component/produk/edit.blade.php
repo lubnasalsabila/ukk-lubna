@@ -3,11 +3,11 @@
 @section('content')
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Tambah Produk</h1>
+    <h1 class="mt-4">Edit Produk</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="{{ route('product.index') }}">Produk</a></li>
-        <li class="breadcrumb-item active">Tambah Produk</li>
+        <li class="breadcrumb-item active">Edit Produk</li>
     </ol>
     <form action="{{ route('product.update', $product['id']) }}" method="post" enctype="multipart/form-data">
         @csrf
@@ -29,12 +29,12 @@
                     <div class="mb-3">
                         <label for="price" class="form-label">Harga Produk</label>
                         <input type="text" class="form-control" id="price" name="price" oninput="formatRupiah(this)" value="Rp {{ number_format($product['price'], 0, ',', '.') }}">
-                        <input type="hidden" id="hargaValue" name="hargaValue" value="{{ $product['harga'] }}">
+                        <input type="hidden" id="hargaValue" name="hargaValue" value="{{ $product['price'] }}">
                     </div>
                     <div class="mb-3">
                         <label for="image" class="form-label">Gambar Produk</label>
                         <input type="file" class="form-control" id="image" name="image" value="{{ $product['image'] }}">
-                    </div>    
+                    </div>
                 </div>
             </div>
             <div class="me-4 mb-4 d-flex ms-auto">

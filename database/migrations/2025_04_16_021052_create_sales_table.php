@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
             $table->date('sale_date');
-            $table->integer('customer_id');
+            $table->integer('customer_id')->nullable();
             $table->integer('total_price');
             $table->integer('total_pay');
             $table->integer('cashback');

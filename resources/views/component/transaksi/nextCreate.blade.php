@@ -5,11 +5,11 @@
     <h1 class="mt-4">Transaksi</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('transaksi.index') }}">Riwayat Transaksi</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('penjualan.index') }}">Penjualan</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('sale.index') }}">Riwayat Transaksi</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('DetailSale.index') }}">Penjualan</a></li>
         <li class="breadcrumb-item active">Transaksi</li>
     </ol>
-    <form action="{{ route('transaksi.submit-next', $transaksi->id) }}" method="post">
+    <form action="{{ route('sale.submit-next', $sale->id) }}" method="post">
         @csrf
 
         <div class="card">
@@ -26,44 +26,44 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($transaksi->penjualans as $item)         
+                                @foreach ($sale->detail_sales as $item)
                                 <tr>
-                                    <td>{{ $item->produk->name }}</td>
-                                    <td>{{ $item->jumlahDibeli }}</td>
-                                    <td>Rp. {{ number_format($item->produk->harga, 0, ',', '.') }}</td>
-                                    <td>Rp. {{ number_format($item->subTotal, 0, ',', '.') }}</td>
+                                    <td>{{ $item->products->name_product }}</td>
+                                    <td>{{ $item->quantity }}</td>
+                                    <td>Rp. {{ number_format($item->products->price, 0, ',', '.') }}</td>
+                                    <td>Rp. {{ number_format($item->sub_total, 0, ',', '.') }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
                         <div class="text-end row">
                             <h5 class="fw-medium me-5 col">Total Harga</h5>
-                            <h5  class="fw-medium col">Rp. {{ number_format($transaksi->totalHarga, 0, ',', '.') }}</h5>
+                            <h5  class="fw-medium col">Rp. {{ number_format($sale->total_price, 0, ',', '.') }}</h5>
                         </div>
                         <div class="text-end row">
                             <h5 class="fw-medium me-5 col">Total Bayar</h5>
-                            <h5  class="fw-medium col">Rp. {{ number_format($transaksi->totalBayar, 0, ',', '.') }}</h5>
+                            <h5  class="fw-medium col">Rp. {{ number_format($sale->total_pay, 0, ',', '.') }}</h5>
                         </div>
                     </div>
                 </div>
                 <div class="ms-1 col">
 
                     <div class="mb-3">
-                        <label for="namaMember" class="form-label">
+                        <label for="customer_name" class="form-label">
                             Nama Member (identitas)
                         </label>
-                        <input type="text" class="form-control" id="namaMember" name="namaMember" value="{{ $transaksi->member->namaMember ?? '' }}">
+                        <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ $sale->customers->customer_name ?? '' }}">
                     </div>
 
                     <div class="mb-3">
                         <label for="poin" class="form-label">Poin</label>
-                        <input type="text" class="form-control" id="poin" name="poin" value="{{ $transaksi->member->poin }}" disabled>
-                        
+                        <input type="text" class="form-control" id="poin" name="poin" value="{{ $sale->customers->poin }}" disabled>
+
                         <div class="form-check">
-                            <input 
-                                class="form-check-input" 
-                                type="checkbox" 
-                                value="1" 
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                value="1"
                                 id="checkDefault"
                                 name="gunakan_poin"
                                 {{ $isFirstPurchase ? 'disabled' : '' }}
@@ -83,7 +83,7 @@
             <div class="me-4 mb-4 d-flex ms-auto">
                 <button type="submit" class="btn btn-primary ms-1" href="" id="submitButton">
                     <i class="fa-solid fa-paper-plane"></i>
-                    Kirim 
+                    Kirim
                 </button>
             </div>
         </div>

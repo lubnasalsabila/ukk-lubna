@@ -4,34 +4,36 @@
 
 <div class="container-fluid px-4">
 
-@if($message = Session::get('failed'))
-    <script>
-        Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text:"{{$message}}"
+    {{-- SweetAlert for Success --}}
+    @if ($message = Session::get('success'))
+        <script>
+            Swal.fire({
+                title: "Success",
+                icon: "success",
+                text: "{{ $message }}",
+                draggable: true
             });
-    </script>
-@endif
+        </script>
+    @endif
 
-@if($message = Session::get('success'))
-    <script>
-        Swal.fire({
-            title: "Success !",
-            icon: "success",
-            text:"{{$message}}",
-            draggable: true
-        });
-    </script>
-@endif
+    {{-- SweetAlert for Failed --}}
+    @if ($message = Session::get('failed'))
+        <script>
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "{{ $message }}"
+            });
+        </script>
+    @endif
 
-    <h1 class="mt-4">Welcome, Good Morning {{Auth::user()->username}}</h1>
+    <h1 class="mt-4">Welcome, {{ Auth::user()->username }}</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item active">Dashboard</li>
     </ol>
     <div class="card">
         <div class="card-body">
-            @if (Auth::user()->role == 'staff') 
+            @if (Auth::user()->role === 'staff')
                 <div class="card">
                     <div class="card-body">
                         <h3>Selamat Datang Petugas</h3>
@@ -41,17 +43,18 @@
                                     <p class="mb-0">Total Penjualan Hari Ini</p>
                                 </div>
                                 <div class="bg-white p-3 mb-2 rounded shadow-sm">
-                                    <h4 class="fw-normal">0</h4>
+                                    <h4 class="fw-normal">{{ $salesCountToday }}</h4>
                                     <p class="mb-0">Jumlah total penjualan yang terjadi hari ini.</p>
                                 </div>
                                 <div class="bg-secondary bg-opacity-10 p-2">
-                                    
+                                    Terakhir diperbarui: {{ $latestSale ? \Carbon\Carbon::parse($latestSale->created_at)->format('d M Y H:i') : 'Belum ada transaksi' }}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            @elseif(Auth::user()->role == 'admin')
+
+            @elseif (Auth::user()->role === 'admin')
                 <div class="row">
                     <div class="col-md-8">
                         <canvas id="salesChart"></canvas>
@@ -64,26 +67,15 @@
             @endif
         </div>
     </div>
-    
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Dummy Data
-            const dates = [
-                "14 April 2025",
-                "15 April 2025",
-                "16 April 2025",
-                "17 April 2025",
-                "18 April 2025",
-                "19 April 2025",
-                "20 April 2025"
-            ];
-
-            const salesCount = [12, 19, 3, 5, 2, 3, 7];
-
-            const productNames = ['Pensil', 'Pulpen', 'Buku', 'Penghapus', 'Spidol'];
-            const productTotals = [10, 15, 25, 5, 20];
+            var dates = {!! json_encode($dates ?? []) !!};
+            var salesCount = {!! json_encode($salesCountChart ?? []) !!};
+            var productNames = {!! json_encode($productNames ?? []) !!};
+            var productTotals = {!! json_encode($productTotals ?? []) !!};
 
             if (document.getElementById('salesChart')) {
                 const ctxBar = document.getElementById('salesChart').getContext('2d');
@@ -118,7 +110,7 @@
                             data: productTotals,
                             backgroundColor: [
                                 '#ff6384', '#36a2eb', '#ffce56',
-                                '#4bc0c0', '#9966ff'
+                                '#4bc0c0', '#9966ff', '#ffa500'
                             ]
                         }]
                     },
@@ -128,9 +120,8 @@
                 });
             }
         });
-    </script>
+        </script>
 
-        
 </div>
 
 @endsection

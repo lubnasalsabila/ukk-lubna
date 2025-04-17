@@ -43,15 +43,15 @@ class ProductController extends Controller
             'stock' => $request->stock,
             'price' => $request->hargaValue,
         ];
-        
+
         if ($request->file('image')->isValid()) {
             $file = $request->file('image');
             $path = $file->store('photoProduk', 'public');
             $dataProduct['image'] = $path;
         }
-        
+
         Product::create($dataProduct);
-        
+
         return redirect()->route('product.index')->with('success', 'Berhasil menambahkan data produk!');
 
     }
@@ -59,7 +59,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Produk $produk)
+    public function show(Request $request)
     {
         //
     }
@@ -85,6 +85,7 @@ class ProductController extends Controller
             'hargaValue' => 'required',
         ]);
 
+        $product = Product::findOrFail($id);
 
         $updateData = [
             'name_product' => $validatedData['name_product'],
@@ -99,11 +100,10 @@ class ProductController extends Controller
 
             $file = $request->file('image');
             $path = $file->store('photoProduk', 'public');
-            
+
             $updateData['image'] = $path;
         }
 
-        $product = Product::findOrFail($id);
         // dd($updateData);
         $product->update($updateData);
 
@@ -137,8 +137,8 @@ class ProductController extends Controller
         if (!$product) {
             return redirect()->back()->with('failed', 'Data tidak ditemukan');
         }
-        $penjualanUsingProduk = $product->detail_sales()->exists();
-        
+        $penjualanUsingProduct = $product->detail_sales()->exists();
+
         if ($penjualanUsingProduct) {
             return redirect()->back()->with('failed', 'Produk sudah digunakan dalam penjualan');
         } else {
